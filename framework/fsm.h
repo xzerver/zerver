@@ -15,7 +15,7 @@ typedef std::map<Module::Name, Module*> ModuleMap;
 typedef std::map<Module::Name, std::map<ModState, Module::Name> > ModuleTransitionMap;
 class Fsm {
   public:
-    Fsm(tcp::socket& socket) : socket_(socket) {
+    Fsm(tcp::socket& socket) : socket_(socket), exit_(false) {
     }
 
     typedef boost::shared_ptr<Fsm> pointer;
@@ -32,6 +32,7 @@ class Fsm {
     void handle_request();
     void resume(Module* last_mod, ModState state, IFsmData* data);
     tcp::socket& socket() { return socket_; }
+    void exit();
 
   private:
     void _run(Module* mod, IFsmData* data);

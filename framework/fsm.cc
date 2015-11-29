@@ -61,4 +61,8 @@ IFsmData* Fsm::_get_data() {
   IFsmData* data = fsm_data_factory_->create_data(this);
 }
 
+void Fsm::exit() {
+  exit_ = true;
+}
+
 }
