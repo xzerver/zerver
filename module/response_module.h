@@ -11,8 +11,15 @@ class ResponseModule : public Module {
 
   protected:
     virtual void get_resp(char** resp, uint32_t* resp_len) = 0;
+    virtual void on_write_resp_failed() {}
+    virtual void on_write_resp_time_out() {}
+    virtual uint32_t get_write_resp_time_out_ms() { return 30; }
+    boost::asio::deadline_timer timer_;
+
+  private:
     void on_write_resp(IFsmData* data, 
         const boost::system::error_code& error);
+    void on_write_time_out(IFsmData* data);
 };
 
 }

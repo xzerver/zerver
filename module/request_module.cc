@@ -30,6 +30,7 @@ void RequestModule::on_read_head(IFsmData* data,
   timer_.cancel();
 
   if (ec) {
+    on_read_head_failed();
     data->fsm()->exit();
     data->fsm()->resume(this, Mod_Failed, data);
     return;
@@ -38,6 +39,7 @@ void RequestModule::on_read_head(IFsmData* data,
   uint32_t body_len = get_body_len(head.get(), len);
   // check head failed
   if (body_len == -1) {
+    on_read_head_failed();
     data->fsm()->exit();
     data->fsm()->resume(this, Mod_Failed, data);
     return;
@@ -65,6 +67,7 @@ void RequestModule::on_read_body(IFsmData* data,
   timer_.cancel();
 
   if (ec) {
+    on_read_body_failed();
     data->fsm()->exit();
     data->fsm()->resume(this, Mod_Failed, data);
     return;
@@ -72,12 +75,22 @@ void RequestModule::on_read_body(IFsmData* data,
 
   bool ret = on_read_body_impl(body, len);
   ModState state = (ret ? Mod_Succeed : Mod_Failed);
-  if (!ret)
+  if (!ret) {
+    on_read_body_failed();
     data->fsm()->exit();
-  data->fsm()->resume(this, state, data);
+    data->fsm()->resume(this, Mod_Failed, data);
+    return;
+  }
+  data->fsm()->resume(this, Mod_Succeed, data);
 }
 
 void RequestModule::on_read_time_out(uint32_t flag, IFsmData* data) {
+  if (1 == flag) {
+    on_read_head_time_out();
+  } else {
+    on_read_body_time_out();
+  }
+
   data->fsm()->exit();
   data->fsm()->resume(this, Mod_Timeout, data);
 }

@@ -18,6 +18,15 @@ class RequestModule : public Module {
     virtual uint32_t get_read_head_time_out_ms() { return 30 * 1000; }
     virtual uint32_t get_read_body_time_out_ms() { return 30; }
 
+    virtual void on_read_head_failed() {}
+    virtual void on_read_body_failed() {}
+    virtual void on_read_head_time_out() {}
+    virtual void on_read_body_time_out() {}
+
+    virtual bool on_read_body_impl(boost::shared_array<char> body, 
+        uint32_t len) = 0;
+    boost::asio::deadline_timer timer_;
+  private:
     void on_read_head(IFsmData* data,
         boost::shared_array<char> head, 
         uint32_t len, 
@@ -29,10 +38,6 @@ class RequestModule : public Module {
         const boost::system::error_code& ec);
 
     void on_read_time_out(uint32_t flag, IFsmData* data);
-
-    virtual bool on_read_body_impl(boost::shared_array<char> body, 
-        uint32_t len) = 0;
-    boost::asio::deadline_timer timer_;
 };
 
 

@@ -1,5 +1,9 @@
+#ifndef __ZERVER_SIMPLE_MODULE_H__
+#define __ZERVER_SIMPLE_MODULE_H__
 
+#include "../framework/module.h"
 
+namespace zerver {
 
 class SimpleModule : public Module {
   public:
@@ -9,4 +13,8 @@ class SimpleModule : public Module {
 
   protected:
     virtual ModState run_impl(IFsmData* data) = 0;
+};
+
 }
+
+#endif
