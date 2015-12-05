@@ -22,15 +22,14 @@ void TcpServer::run() {
 }
 
 void TcpServer::start_accept() {
-  TcpConnection::pointer conn = TcpConnection::create_connection(io_service_);
-
+  TcpConnectionPtr conn = TcpConnection::create_connection(io_service_);
   acceptor_.async_accept(conn->socket(), boost::bind(&TcpServer::on_accepted, this, conn, boost::asio::placeholders::error));
 }
 
 
-void TcpServer::on_accepted(TcpConnection::pointer conn, const boost::system::error_code& error) {
-  Fsm::pointer fsm = Fsm::create_fsm(conn->socket());
-  fsm->handle_request();
+void TcpServer::on_accepted(TcpConnectionPtr conn, const boost::system::error_code& error) {
+  FsmContextPtr context = FsmContextPtr(new FsmContext(conn));
+  context->fsm()->handle_request(context);
 
   start_accept();
 }
