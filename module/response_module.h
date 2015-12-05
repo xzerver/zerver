@@ -7,7 +7,7 @@ namespace zerver {
 class ResponseModule : public Module {
   public:
     virtual bool is_async() { return true; }
-    virtual ModState run(IFsmData* data);
+    virtual ModState run(FsmContextPtr context);
 
   protected:
     virtual void get_resp(char** resp, uint32_t* resp_len) = 0;
@@ -17,9 +17,9 @@ class ResponseModule : public Module {
     boost::asio::deadline_timer timer_;
 
   private:
-    void on_write_resp(IFsmData* data, 
+    void on_write_resp(FsmContextPtr context, 
         const boost::system::error_code& error);
-    void on_write_time_out(IFsmData* data);
+    void on_write_time_out(FsmContextPtr context);
 };
 
 }

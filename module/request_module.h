@@ -9,7 +9,7 @@ namespace zerver {
 class RequestModule : public Module {
   public:
     virtual bool is_async() { return true; }
-    virtual ModState run(IFsmData* data);
+    virtual ModState run(FsmContextPtr context);
 
   protected:
     virtual uint32_t get_head_len() { return 256; }
@@ -27,17 +27,17 @@ class RequestModule : public Module {
         uint32_t len) = 0;
     boost::asio::deadline_timer timer_;
   private:
-    void on_read_head(IFsmData* data,
+    void on_read_head(FsmContextPtr context,
         boost::shared_array<char> head, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
-    void on_read_body(IFsmData* data,
+    void on_read_body(FsmContextPtr context,
         boost::shared_array<char> body, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
-    void on_read_time_out(uint32_t flag, IFsmData* data);
+    void on_read_time_out(uint32_t flag, FsmContextPtr context);
 };
 
 

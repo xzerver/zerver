@@ -9,10 +9,10 @@ class SimpleModule : public Module {
   public:
     bool is_async() { return false; }
 
-    ModState run(IFsmData* data);
+    ModState run(FsmContextPtr context);
 
   protected:
-    virtual ModState run_impl(IFsmData* data) = 0;
+    virtual ModState run_impl(FsmContextPtr context) = 0;
 };
 
 }
