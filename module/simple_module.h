@@ -7,6 +7,8 @@ namespace zerver {
 
 class SimpleModule : public Module {
   public:
+    SimpleModule(const std::string& name) : Module(name) {
+    }
     bool is_async() { return false; }
 
     ModState run(FsmContextPtr context);
