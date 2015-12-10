@@ -1,12 +1,6 @@
-class KaraModuleData {
-  public:
-    KaraModuleData(Data* data) : data(data_) {}
+#include "DataDefines.h"
 
-    friend class KaraModule;
-  private:
-    inline void set_v1(int v1) { data_->set_v1(v1); }
-    Data* data_;
-};
-
-
+BEGIN_MODULE_DATA(KaraModuleData, KaraModule)
+  DEFINE_PRIM_VAR_R(int, price)
+END_MODULE_DATA()
 

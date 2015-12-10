@@ -21,8 +21,11 @@ class FsmData : public IFsmData{
     FsmData(Fsm* fsm) : IFsmData(fsm) {
     }
 
+    KaraModuleData* get_KaraModuleData() {
+      return kara_mod_data_;
+    }
+  private:
     KaraModuleData* kara_mod_data_;
     GuruModuleData* guru_mod_data_;
-  private:
     Data* data_;
 };

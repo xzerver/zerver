@@ -1,13 +1,20 @@
+#include "../module/simple_module.h"
+#include "ModuleDefines.h"
+
+namespace example {
 
 
-class KaraModule : public SimpleModule{
-  public:
-    virtual ModState run_impl(IFsmData* data) {
-      KaraModuleData* d = get_KaraModuleData();
-    }
+BEGIN_CLASS(KaraModule, SimpleModule, KaraModuleData)
 
-    KaraModuleData* get_KaraModuleData() {
-      return run(static_cast<FsmData*>(data)->kara_mod_data_);
-    }
+public:
+  KaraModule(const std::string& name) : SimpleModule(name) {
+  }
+
+protected:
+  virtual ModState run_impl(FsmContextPtr context);
+
+
+ENDCLASS(KaraModule)
+
 
 }
