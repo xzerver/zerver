@@ -1,7 +1,9 @@
 #include "../module/simple_module.h"
 #include "ModuleDefines.h"
+#include "KaraModuleData.h"
 
 namespace example {
+
 
 
 BEGIN_CLASS(KaraModule, SimpleModule, KaraModuleData)

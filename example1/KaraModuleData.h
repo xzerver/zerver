@@ -1,6 +1,7 @@
-#include "DataDefines.h"
+#include "ModuleDataDefines.h"
 
 BEGIN_MODULE_DATA(KaraModuleData, KaraModule)
-  DEFINE_PRIM_VAR_R(int, price)
+#include "KaraModuleDataDecl.h"
 END_MODULE_DATA()
+
 

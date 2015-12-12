@@ -1,18 +1,11 @@
-DEFINE(primitive, rw, int, v1)
-DEFINE(object, w, Kara, kara)
+#ifndef __EXAMPLE_DATA_H__
+#define __EXAMPLE_DATA_H__
+
+#include "FsmDataDefines.h"
 
 class Data {
   public:
-    void set_v1(int v1) { v1_ = v1; }
-    int get_v1() const { return v1_; }
-    void set_v2(int v2) { v2_ = v2; }
-    int get_v2() const { return v2_; }
-    Kara& get_mutable_kara() { return kara_; }
-    const Kara& get_kara() const { return kara_; }
-  private:
-    int v1_;
-    int v2_;
-    Kara kara_;
+#include "KaraModuleDataDecl.h"
 };
 
 
@@ -21,11 +14,11 @@ class FsmData : public IFsmData{
     FsmData(Fsm* fsm) : IFsmData(fsm) {
     }
 
-    KaraModuleData* get_KaraModuleData() {
-      return kara_mod_data_;
-    }
+    DEFINE_MODULE_DATA(KaraModuleData, kara_mod_data)
+
   private:
-    KaraModuleData* kara_mod_data_;
-    GuruModuleData* guru_mod_data_;
     Data* data_;
 };
+
+
+#endif
