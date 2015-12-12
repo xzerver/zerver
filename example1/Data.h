@@ -1,23 +1,31 @@
 #ifndef __EXAMPLE_DATA_H__
 #define __EXAMPLE_DATA_H__
 
-#include "FsmDataDefines.h"
+#include "CustomDataStruct.h"
+
+#define DEFINE_PRIM_VAR(type, v1) \
+public: \
+  type get_##v1() { return v1##_; } \
+  type set_##v1(type v1) { v1##_ = v1; } \
+private: \
+  type v1##_;
+
+#define DEFINE_OBJ_VAR(type, o1) \
+public: \
+  const type& get_const_##o1() { return o1##_; } \
+  type& get_mutable_##o1() { return o1##_; }  \
+private: \
+  type o1##_;
+
 
 class Data {
   public:
-#include "KaraModuleDataDecl.h"
-};
-
-
-class FsmData : public IFsmData{
-  public:
-    FsmData(Fsm* fsm) : IFsmData(fsm) {
-    }
-
-    DEFINE_MODULE_DATA(KaraModuleData, kara_mod_data)
-
-  private:
-    Data* data_;
+    DEFINE_PRIM_VAR(int, id)
+    DEFINE_PRIM_VAR(short, school)
+    DEFINE_PRIM_VAR(float, price)
+    DEFINE_OBJ_VAR(std::string, name)
+    DEFINE_OBJ_VAR(CustomData1, data1)
+    DEFINE_OBJ_VAR(CustomData2, data2)
 };
 
 

@@ -1,10 +1,12 @@
+#ifndef __KARA_MODULE_H__
+#define __KARA_MODULE_H__
+
 #include "../module/simple_module.h"
-#include "ModuleDefines.h"
+#include "../macro_define/ModuleDefines.h"
 #include "KaraModuleData.h"
+#include "FsmData.h"
 
-namespace example {
-
-
+using namespace zerver;
 
 BEGIN_CLASS(KaraModule, SimpleModule, KaraModuleData)
 
@@ -15,8 +17,6 @@ public:
 protected:
   virtual ModState run_impl(FsmContextPtr context);
 
+ENDCLASS()
 
-ENDCLASS(KaraModule)
-
-
-}
+#endif

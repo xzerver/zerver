@@ -1,8 +1,17 @@
+#ifndef __FSM_DATA_DEFINES_H__
+#define __FSM_DATA_DEFINES_H__
+
+
 #define DEFINE_MODULE_DATA(KaraModuleData, kara_mod_data) \
 public: \
-  KaraModuleData* get_##KaraModuleData() { return kara_mod_data##_; } \
+  KaraModuleData* get_##KaraModuleData() { \
+    if (kara_mod_data##_.is_null()) { \
+      kara_mod_data##_.reset(new KaraModuleData(data_)); \
+    } \
+    return kara_mod_data##_.get(); \
+  } \
 private: \
-  KaraModuleData* kara_mod_data##_;
+  boost::shared_ptr<KaraModuleData> kara_mod_data##_;
 
 
 #define DEFINE_PRIM_VAR_R(type, v1) \
@@ -43,3 +52,4 @@ public: \
 private: \
   type o1##_;
 
+#endif

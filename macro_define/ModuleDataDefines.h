@@ -1,5 +1,4 @@
 
-
 #define BEGIN_MODULE_DATA(KaraModuleData, KaraModule) \
 class KaraModuleData { \
   public: \
@@ -37,3 +36,4 @@ private: \
 
 #define END_MODULE_DATA() \
 };
+
