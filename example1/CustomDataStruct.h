@@ -1,6 +1,7 @@
 #ifndef __CUSTOM_DATA_STRUCTURE_H__
 #define __CUSTOM_DATA_STRUCTURE_H__
 
+#include "../framework/types_def.h"
 
 struct CustomData1 {
   float d1;

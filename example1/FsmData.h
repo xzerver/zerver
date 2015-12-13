@@ -2,7 +2,7 @@
 #define __FSM_DATA_H__
 
 
-//#include "../framework/data.h"
+#include "../framework/data.h"
 #include "KaraModuleData.h"
 #include "GuruModuleData.h"
 

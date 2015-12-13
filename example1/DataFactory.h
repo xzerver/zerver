@@ -2,12 +2,14 @@
 #define __DATA_FACTORY_H__
 
 
-#include "Data.h"
+#include "FsmData.h"
 #include "../framework/data.h"
+
+using namespace zerver;
 
 class DataFactory : public IFsmDataFactory {
   virtual FsmDataPtr create_data() {
-    return FsmDataptr(new FsmData());
+    return FsmDataPtr(new FsmData());
   }
 };
 
