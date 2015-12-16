@@ -16,43 +16,25 @@
 // You should have received a copy of the GNU General Public License
 // along with xzerver. If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef __ZERVER_MODULE_H__
-#define __ZERVER_MODULE_H__
+#ifndef __ZERVER_FORK_MODULE_H__
+#define __ZERVER_FORK_MODULE_H__
 
-#include <string>
-#include "types_def.h"
-#include "data.h"
+#include "../framework/module.h"
 
 namespace zerver {
 
-const ModState Mod_Succeed = 1;
-const ModState Mod_Failed = 2;
-const ModState Mod_Timeout = 3;
-const ModState Mod_else = 0;
-const ModState Mod_async = 4;
-
-class IModuleData {
-};
-
-
-class Module {
+class ForkModule : public Module {
   public:
-    Module(const std::string& name) : name_(name) {
+    ForkModule(const std::string& name) : Module(name) {
     }
+    bool is_async() { return true; }
 
-    virtual ModuleDataPtr create_data() { return ModuleDataPtr(new IModuleData); }
-
-    virtual bool is_async() = 0;
-    virtual ModState run(FsmContextPtr context) = 0;
-    virtual void on_link_out(ModState state) {}
-    virtual void on_link_in(ModState state) {}
-
-    const std::string& name() const { return name_; }
+    ModState run(FsmContextPtr context);
+    virtual void on_link_out(ModState state);
 
   protected:
-    std::string name_;
+    std::vector<ModState> next_module_states_;
 };
-
 
 }
 

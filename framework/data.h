@@ -40,6 +40,7 @@ class IFsmData {
     IFsmData()  {
     }
 
+    virtual void reset() = 0;
 };
 
 
@@ -55,6 +56,8 @@ class FsmContext {
 
     Fsm* fsm() { return fsm_; }
     void reset();
+    void lock();
+    void unlock();
     FsmDataPtr data() { return data_; }
     TcpConnectionPtr conn() { return conn_; }
     ModuleDataPtr get_module_data(const std::string& name) { return module_data_map_[name]; }

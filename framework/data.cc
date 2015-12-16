@@ -33,11 +33,18 @@ FsmContext::FsmContext(TcpConnectionPtr conn) : conn_(conn) {
   }
 }
 
-void FsmContext::reset() {
-}
-
 FsmContext::~FsmContext() {
   delete fsm_;
+}
+
+void FsmContext::reset() {
+  data_->reset();
+}
+
+void FsmContext::lock() {
+}
+
+void FsmContext::unlock() {
 }
 
 }
