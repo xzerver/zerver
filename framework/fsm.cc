@@ -28,14 +28,14 @@ void Fsm::handle_request(FsmContextPtr context) {
 void Fsm::_run(Module* mod, FsmContextPtr context) {
   if (mod->is_async()) {
     // lock the context data because it's a thread-parallel process
-    context->lock();
+//    context->lock();
     mod->run(context);
-    context->unlock();
+//    context->unlock();
   } else {
     // lock the context data because it's a thread-parallel process
-    context->lock();
+//    context->lock();
     ModState state = mod->run(context);
-    context->unlock();
+//    context->unlock();
     if (mod == end_mod_) {
       return _end_request(context);
     }

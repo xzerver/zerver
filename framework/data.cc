@@ -41,10 +41,11 @@ void FsmContext::reset() {
   data_->reset();
 }
 
+/*
 void FsmContext::lock() {
 }
 
 void FsmContext::unlock() {
 }
-
+*/
 }
