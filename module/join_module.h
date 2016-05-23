@@ -44,6 +44,9 @@ class JoinModule : public Module {
     }
     bool is_async() { return true; }
 
+    virtual ModuleDataPtr create_data() { 
+      return ModuleDataPtr(new ModuleData); 
+    }
     ModState run(FsmContextPtr context);
     virtual void on_link_in(ModState state);
 

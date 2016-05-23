@@ -37,6 +37,9 @@ class RequestModule : public Module {
     virtual bool is_async() { return true; }
     virtual ModState run(FsmContextPtr context);
 
+    virtual ModuleDataPtr create_data() { 
+      return ModuleDataPtr(new ModuleData); 
+    }
   protected:
     virtual uint32_t get_head_len() { return 256; }
     // return -1 if head illegal

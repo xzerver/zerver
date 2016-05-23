@@ -34,6 +34,9 @@ class ResponseModule : public Module {
     virtual bool is_async() { return true; }
     virtual ModState run(FsmContextPtr context);
 
+    virtual ModuleDataPtr create_data() { 
+      return ModuleDataPtr(new ModuleData); 
+    }
   protected:
     virtual void get_resp(char** resp, uint32_t* resp_len, FsmContextPtr context) = 0;
     virtual void on_write_resp_failed(FsmContextPtr context) {}

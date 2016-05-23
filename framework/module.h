@@ -32,6 +32,8 @@ const ModState Mod_else = 0;
 const ModState Mod_async = 4;
 
 class IModuleData {
+  virtual ~IModuleData() {
+  }
 };
 
 
@@ -40,10 +42,13 @@ class Module {
     Module(const std::string& name) : name_(name) {
     }
 
+    // module that have one's own ModuleData should overide this method
     virtual ModuleDataPtr create_data() { return ModuleDataPtr(new IModuleData); }
 
     virtual bool is_async() = 0;
     virtual ModState run(FsmContextPtr context) = 0;
+    virtual void pre_run(FsmContextPtr context);
+    virtual void post_run(FsmContextPtr context);
     virtual void on_link_out(ModState state) {}
     virtual void on_link_in(ModState state) {}
 

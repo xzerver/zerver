@@ -40,6 +40,9 @@ class TcpModule : public Module {
 
     bool is_async() { return false; }
     virtual ModState run(FsmContextPtr context);
+    virtual ModuleDataPtr create_data() { 
+      return ModuleDataPtr(new ModuleData); 
+    }
 
   private:
     void on_connect(FsmContextPtr context, 
