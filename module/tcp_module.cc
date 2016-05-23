@@ -75,7 +75,6 @@ ModState TcpModule::send_request(FsmContextPtr context) {
 void TcpModule::on_write_req(FsmContextPtr context, const boost::system::error_code& error) {
   if (error) {
     on_send_req_failed(context);
-    context->fsm()->exit();
     context->fsm()->resume(this, Mod_Failed, context);
   } else {
     ModuleData* data = static_cast<ModuleData*>(context->get_module_data(name()).get());
