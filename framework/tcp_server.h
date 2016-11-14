@@ -20,24 +20,57 @@
 #define __ZERVER_TCP_SERVER_H__
 
 #include "fsm.h"
-
+#include "thirdparty/boost/shared_ptr.hpp"
 namespace zerver {
+enum run_mode
+{
+  RUN_NULL = 0x0,
+  RUN_THREAD = 0x10,
+  RUN_PROCESS,
+};
 
 class TcpServer {
   public:
-    TcpServer(int num_threads, int port) : port_(port), 
-    num_threads_(num_threads),
-    acceptor_(io_service_, tcp::endpoint(tcp::v4(), port)) {
+    TcpServer(int port, int task_number);
+
+    virtual ~TcpServer();
+
+    boost::asio::io_service& io_service()
+    {
+      return *io_service_;
     }
 
-    void run();
+    void run(run_mode mod = RUN_THREAD);
+
+    boost::shared_ptr<Fsm> fsm()
+    {
+      return fsm_;
+    }
+
   private:
     void start_accept();
+    void start_signal_wait();
+    void run_for_child(int thread_num = 1);
+    void run_multi_thread(int thread_num = 1);
+    void run_multi_process(int process_num = 1);
+    void handle_signal(const boost::system::error_code& error, int signal_number);
     void on_accepted(TcpConnectionPtr conn, const boost::system::error_code& error);
-    boost::asio::io_service io_service_;
-    tcp::acceptor acceptor_;
+  
+  protected:
+    virtual void clear();
+  
+    virtual void on_child_running(){}
+
+    virtual void on_child_killing(boost::system::error_code err){}
+
+  private:
     int port_;
-    int num_threads_;
+    int task_number_;
+    run_mode server_mode_;
+    boost::shared_ptr<Fsm> fsm_;
+    boost::shared_ptr<boost::asio::io_service> io_service_;
+    boost::shared_ptr<boost::asio::signal_set> signal_;
+    boost::shared_ptr<boost::asio::ip::tcp::acceptor> acceptor_;
 };
 
 }

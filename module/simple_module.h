@@ -27,9 +27,8 @@ class SimpleModule : public Module {
   public:
     SimpleModule(const std::string& name) : Module(name) {
     }
-    bool is_async() { return false; }
 
-    ModState run(FsmContextPtr context);
+    ModState run(FsmContextPtr context, ModState last_mod_state);
 
   protected:
     virtual ModState run_impl(FsmContextPtr context) = 0;

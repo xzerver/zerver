@@ -19,8 +19,7 @@
 #ifndef __ZERVER_REQUEST_MODULE_H__
 #define __ZERVER_REQUEST_MODULE_H__
 
-#include "../framework/module.h"
-#include <boost/shared_array.hpp>
+#include "framework/module.h"
 
 namespace zerver {
 
@@ -28,45 +27,65 @@ class RequestModule : public Module {
   public:
     class ModuleData : public IModuleData {
       public:
+        ModuleData(FsmContext* context) : timer_(context->io_service()) {
+        }
         boost::asio::deadline_timer timer_;
     };
 
     RequestModule(const std::string& name) : Module(name) {
     }
 
-    virtual bool is_async() { return true; }
-    virtual ModState run(FsmContextPtr context);
+    virtual ModState run(FsmContextPtr context, ModState last_mod_state);
 
-    virtual ModuleDataPtr create_data() { 
-      return ModuleDataPtr(new ModuleData); 
+    virtual ModuleDataPtr create_data(FsmContext* context) { 
+      return ModuleDataPtr(new ModuleData(context)); 
     }
   protected:
-    virtual uint32_t get_head_len() { return 256; }
+    virtual uint32_t get_version_len(FsmContextPtr context) = 0;
+    virtual uint32_t get_head_len(FsmContextPtr context) = 0;
     // return -1 if head illegal
-    virtual uint32_t get_body_len(const char* head, uint32_t len, FsmContextPtr context) = 0;
-    virtual uint32_t get_read_head_time_out_ms() { return 30 * 1000; }
-    virtual uint32_t get_read_body_time_out_ms() { return 30; }
+    virtual uint32_t get_body_len(FsmContextPtr context) = 0;
+    virtual uint32_t get_read_version_time_out_ms();
 
+    virtual uint32_t get_read_head_and_body_time_out_ms();
+
+    virtual void on_read_version_failed(FsmContextPtr context) {}
     virtual void on_read_head_failed(FsmContextPtr context) {}
     virtual void on_read_body_failed(FsmContextPtr context) {}
-    virtual void on_read_head_time_out(FsmContextPtr context) {}
-    virtual void on_read_body_time_out(FsmContextPtr context) {}
+    virtual void on_read_version_time_out(FsmContextPtr context) {}
+    virtual void on_read_head_and_body_time_out(FsmContextPtr context) {}
 
-    virtual bool on_read_body_impl(boost::shared_array<char> body, 
+    virtual bool on_read_version_impl(shared_string_array version, 
+        uint32_t len, FsmContextPtr context) = 0;
+    
+    virtual bool on_read_head_impl(shared_string_array head, 
+        uint32_t len, FsmContextPtr context) = 0;
+
+    virtual bool on_read_body_impl(shared_string_array body, 
         uint32_t len, FsmContextPtr context) = 0;
   
+    virtual ModState get_succeed_state(FsmContextPtr context) {
+      return Mod_Succeed;
+    }
+    bool cancel_time_out_timer(FsmContextPtr context);
   private:
+    void on_read_version(FsmContextPtr context,
+        shared_string_array head, 
+        uint32_t len, 
+        const boost::system::error_code& ec);
+
     void on_read_head(FsmContextPtr context,
-        boost::shared_array<char> head, 
+        shared_string_array head, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
     void on_read_body(FsmContextPtr context,
-        boost::shared_array<char> body, 
+        shared_string_array body, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
-    void on_read_time_out(uint32_t flag, FsmContextPtr context);
+    void on_read_time_out(uint32_t flag, FsmContextPtr context, 
+        const boost::system::error_code & ec);
 };
 
 

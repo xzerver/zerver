@@ -30,10 +30,25 @@ const ModState Mod_Failed = 2;
 const ModState Mod_Timeout = 3;
 const ModState Mod_else = 0;
 const ModState Mod_async = 4;
+const ModState Mod_start = 5;
 
 class IModuleData {
-  virtual ~IModuleData() {
-  }
+  public:
+    IModuleData()
+    {
+      //P_LOG(INFO) << "IModuleData New:" << this;
+    }
+
+    virtual ~IModuleData() {
+      //P_LOG(INFO) << "IModuleData Delete:" << this;
+    }
+
+    virtual bool recollectable() {
+      return true;
+    }
+
+    virtual void reset() {
+    }
 };
 
 
@@ -41,14 +56,12 @@ class Module {
   public:
     Module(const std::string& name) : name_(name) {
     }
+    virtual ~Module() {}
 
     // module that have one's own ModuleData should overide this method
-    virtual ModuleDataPtr create_data() { return ModuleDataPtr(new IModuleData); }
+    virtual ModuleDataPtr create_data(FsmContext* context) { return ModuleDataPtr(); }
 
-    virtual bool is_async() = 0;
-    virtual ModState run(FsmContextPtr context) = 0;
-    virtual void pre_run(FsmContextPtr context);
-    virtual void post_run(FsmContextPtr context);
+    virtual ModState run(FsmContextPtr context, ModState last_mod_state) = 0;
     virtual void on_link_out(ModState state) {}
     virtual void on_link_in(ModState state) {}
 

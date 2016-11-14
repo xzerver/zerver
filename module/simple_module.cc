@@ -20,7 +20,7 @@
 
 namespace zerver {
 
-ModState SimpleModule::run(FsmContextPtr context) {
+ModState SimpleModule::run(FsmContextPtr context, ModState last_mod_state) {
   return run_impl(context);
 }
 

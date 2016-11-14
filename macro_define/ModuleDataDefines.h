@@ -55,7 +55,7 @@ private: \
   const type& get_const_##o1() { return data_->get_const_##o1(); } \
   type& get_mutable_##o1() { return data_->get_mutable_##o1(); } 
 
-#define END_MODULE_DATA() \
+#define END_MODULE_DATA \
 };
 
 #endif

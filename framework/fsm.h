@@ -29,29 +29,28 @@ namespace zerver {
 
 class Fsm {
   public:
-    Fsm() : exit_(false) {
-    }
+    virtual ~Fsm();
 
-    static void add_module(Module* mod);
-    static void set_start_module(Module* mod);
-    static void set_end_module(Module* mod);
-    static void link_module(Module* from, Module* to, ModState state);
-    static const ModuleMap& get_module_map();
+    void add_module(Module* mod);
+    void set_start_module(Module* mod) { start_mod_ = mod; }
+    void set_end_module(Module* mod) { end_mod_ = mod; }
+    void link_module(Module* from, Module* to, ModState state);
+    const ModuleMap& get_module_map() {
+      return mod_map_;
+    }
 
     void handle_request(FsmContextPtr context);
     void resume(Module* last_mod, ModState state, FsmContextPtr context);
-    void exit();
 
   private:
-    void _run(Module* mod, FsmContextPtr context);
-    Module* _get_next_module(Module* mod, ModState state);
+    void _run(Module* mod, FsmContextPtr context, ModState last_mod_state);
+    Module* _get_next_module(FsmContextPtr context, Module* mod, ModState state);
     void _end_request(FsmContextPtr context);
 
-    static ModuleTransitionMap mod_trans_map_;
-    static ModuleMap mod_map_;
-    static Module* start_mod_;
-    static Module* end_mod_;
-    bool exit_;
+    ModuleTransitionMap mod_trans_map_;
+    ModuleMap mod_map_;
+    Module* start_mod_;
+    Module* end_mod_;
 };
 }
 

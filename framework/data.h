@@ -23,10 +23,10 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
-#include <boost/thread.hpp>
+#include "boost/asio.hpp"
+#include "boost/shared_ptr.hpp"
+#include "boost/bind.hpp"
+#include "boost/thread.hpp"
 #include "types_def.h"
 #include "module.h"
 #include "fsm.h"
@@ -37,7 +37,12 @@ namespace zerver {
 
 class IFsmData {
   public:
-    IFsmData()  {
+    IFsmData() {
+      //P_LOG(INFO) << "IFsmData New:" << this;
+    }
+
+    virtual ~IFsmData() {
+      //P_LOG(INFO) << "IFsmData Delete:" << this;
     }
 
     virtual void reset() = 0;
@@ -47,30 +52,58 @@ class IFsmData {
 class IFsmDataFactory {
   public:
     virtual FsmDataPtr create_data() = 0;
+    virtual ~IFsmDataFactory() {
+    }
 };
 
 class FsmContext {
   public:
-    FsmContext(TcpConnectionPtr conn);
-    virtual ~FsmContext();
+    FsmContext(TcpConnectionPtr conn, Fsm* fsm, boost::asio::io_service& io_service);
+    virtual ~FsmContext()
+    {}
 
-    Fsm* fsm() { return fsm_; }
+    void init();
+    Fsm* fsm()
+    { return fsm_; }
+
+    boost::asio::io_service& io_service()
+    { return io_service_; }
+
+    bool is_exit()
+    { return exit_; }
+
+    void exit()
+    { exit_ = true; }
+
+    bool recollectable();
     void reset();
-//    void lock();
-//    void unlock();
-    FsmDataPtr data() { return data_; }
-    TcpConnectionPtr conn() { return conn_; }
-    ModuleDataPtr get_module_data(const std::string& name) { return module_data_map_[name]; }
+
+    FsmDataPtr data()
+    { return data_; }
+
+    TcpConnectionPtr conn()
+    { return conn_; }
+
+    ModuleDataPtr get_module_data(const std::string& name)
+    { return module_data_map_[name]; }
+
+    uint32_t UUID() const
+    { return uuid_; }
+
     static void register_fsm_data_factory(IFsmDataFactory* factory);
+
   private:
+    bool exit_;
     Fsm* fsm_;
     TcpConnectionPtr conn_;
-
+    boost::asio::io_service& io_service_;
     FsmDataPtr data_;
     std::map<std::string, ModuleDataPtr> module_data_map_;
     static IFsmDataFactory* fsm_data_factory_;
+    uint32_t uuid_;
 };
 
 }
 
 #endif
+

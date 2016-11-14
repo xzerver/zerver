@@ -16,45 +16,118 @@
 // You should have received a copy of the GNU General Public License
 // along with xzerver. If not, see <http://www.gnu.org/licenses/>.
 //
+#include "sstream"
 #include "tcp_client_pool.h"
-
 
 namespace zerver {
 
-TcpClientPtr TcpClientPool::get_client(uint32_t client_type_id) {
-  _lock();
-  ClientMap::iterator it = client_map_.find(client_type_id);
-  if (it != client_map_.end()) {
-    if (!it->second.empty()) {
-      TcpClientPtr client = it->second.back();
-      // pop from the back
-      it->second.pop_back();
-      return client;
-    } else {
-      return TcpClientPtr();
+  TcpClientPtr TcpClientPool::get_client(int peer_id)
+  {
+    TcpClientPtr client;
+    TcpClientMap::iterator it;
+    WriteLock wlock(mutex_);
+    it = free_clients_.find(peer_id);
+    if (it != free_clients_.end()) {
+      while (!it->second.empty())
+      {
+        client = it->second.front();
+        it->second.pop_front();
+        if (client && !client->is_closed())
+        {
+          if (max_times_ > 0) {
+            if (client->increase_times() > max_times_)
+              client->close();
+            else {
+              if (!client->is_error()) {
+                return client;
+              } else {
+                F_LOG(INFO) << "client is closed ,peer_id:" << peer_id  << " remote_ip:" << client->remote_ip();
+              }
+            }
+          }
+          else {
+            if (!client->is_error()) {
+              return client;
+            } else {
+              F_LOG(INFO) << "client is closed ,peer_id:" << peer_id  << " remote_ip:" << client->remote_ip();
+            }
+          }
+        }
+      }
     }
-  } else {
-    return TcpClientPtr();
+    client.reset();
+    return client;
   }
 
-  _unlock();
-}
-
-void TcpClientPool::recollect(TcpClientPtr client) {
-  _lock();
-
-  uint32_t client_type_id = client->client_type_id();
-  ClientMap::iterator it = client_map_.find(client_type_id);
-  if (it != client_map_.end()) {
-    // push from the front
-    it->second.push_front(client);
-  } else {
-    std::deque<TcpClientPtr> q;
-    q.push_front(client);
-    client_map_[client_type_id] = q;
+  int TcpClientPool::size() const
+  {
+    int num = 0;
+    TcpClientMap::const_iterator it;
+    ReadLock rlock(const_cast<ReadWriteMutex&>(mutex_));
+    it = free_clients_.begin();
+    while (it != free_clients_.end())
+    {
+      num += it->second.size();
+      it++;
+    }
+    return num;
   }
 
-  _unlock();
+  std::string TcpClientPool::debug_string() const
+  {
+    std::stringstream stream;
+    TcpClientMap::const_iterator it;
+    ReadLock rlock(const_cast<ReadWriteMutex&>(mutex_));
+    it = free_clients_.begin();
+    while (it != free_clients_.end())
+    {
+      stream << it->first << ":" << it->second.size() << " ";
+      it++;
+    }
+    return stream.str();
+  }
+
+  void TcpClientPool::check_clients()
+  {
+    WriteLock wlock(mutex_);
+    if (free_clients_.empty()) {
+      call_later();
+      return;
+    }
+    time_t now = time(NULL);
+    TcpClientMap::iterator it;
+    TcpClientDeque::iterator it2;
+    it = free_clients_.begin();
+    while (it != free_clients_.end())
+    {
+      TcpClientDeque &ref_deque = it->second;
+      it2 = ref_deque.begin();
+      while (it2 != ref_deque.end())
+      {
+        if ((*it2)->expired(now, check_time_)) {
+          (*it2)->close();
+          it2 = ref_deque.erase(it2);
+        }
+        else if ((*it2)->is_closed() || (*it2)->is_error()) {
+          it2 = ref_deque.erase(it2);
+        }
+        else {
+          it2++;
+        }
+      }
+      it++;
+    }
+    call_later();
+  }
+
+  void TcpClientPool::recollect(TcpClientPtr client)
+  {
+    if (!client)
+      return;
+    WriteLock wlock(mutex_);
+    client->on_recollect();
+    int peer_id = client->get_peer_id();
+    free_clients_[peer_id].push_back(client);
+  }
 }
 
-}

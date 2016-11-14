@@ -17,35 +17,66 @@
 // along with xzerver. If not, see <http://www.gnu.org/licenses/>.
 //
 #include "data.h"
+#include <sys/time.h>
 
+int my_rand(void)
+{
+  static  boost::thread_specific_ptr<unsigned int> seed;
+  if (NULL == seed.get()) {
+     struct  timeval tv;
+     gettimeofday(&tv, NULL);
+     seed.reset(new unsigned int(tv.tv_sec * tv.tv_usec) );
+  }
+  return rand_r(seed.get());
+}
 
 namespace zerver {
 
-FsmContext::FsmContext(TcpConnectionPtr conn) : conn_(conn) {
-  fsm_ = new Fsm();
+IFsmDataFactory* FsmContext::fsm_data_factory_ = NULL;
+
+void FsmContext::register_fsm_data_factory(IFsmDataFactory* factory)
+{
+  fsm_data_factory_ = factory;
+}
+
+FsmContext::FsmContext(TcpConnectionPtr conn, Fsm* fsm, boost::asio::io_service& io_service) 
+: exit_(false), fsm_(fsm), conn_(conn), io_service_(io_service)
+{
+  uuid_ = 0;
+}
+
+void FsmContext::init() {
   data_ = fsm_data_factory_->create_data();
 
-  const ModuleMap& mod_map = Fsm::get_module_map();
+  const ModuleMap& mod_map = fsm_->get_module_map();
   for (ModuleMap::const_iterator it = mod_map.begin();
       it != mod_map.end(); ++it) {
-    ModuleDataPtr mod_data = it->second->create_data();
-    module_data_map_[it->first] = mod_data;
+    ModuleDataPtr mod_data = it->second->create_data(this);
+    if (mod_data.get())
+      module_data_map_[it->first] = mod_data;
   }
 }
 
-FsmContext::~FsmContext() {
-  delete fsm_;
+bool FsmContext::recollectable() {
+  std::map<std::string, ModuleDataPtr>::const_iterator it = module_data_map_.begin();
+  for (; it != module_data_map_.end(); it++) {
+    if (!it->second->recollectable()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void FsmContext::reset() {
+  exit_ = false;
   data_->reset();
+  
+  uuid_ = my_rand();
+  for (std::map<std::string, ModuleDataPtr>::const_iterator it = module_data_map_.begin();
+      it != module_data_map_.end(); ++it) {
+    it->second->reset();
+  }
 }
 
-/*
-void FsmContext::lock() {
 }
 
-void FsmContext::unlock() {
-}
-*/
-}

@@ -20,24 +20,57 @@
 #define __ZERVER_TCP_CLIENT_POOL_H__
 
 #include "tcp_client.h"
-#include <deque>
+#include "boost/unordered_map.hpp"
+#include "boost/shared_ptr.hpp"
+#include "boost/thread/mutex.hpp"
+#include "boost/thread/shared_mutex.hpp"
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 namespace zerver {
 
-class TcpClientPool {
-  public:
-    TcpClientPtr get_client(uint32_t client_type_id);
-    void recollect(TcpClientPtr client);
+class TcpClientPool
+{
+public:
+  typedef boost::shared_mutex ReadWriteMutex;
+  typedef boost::shared_lock<ReadWriteMutex> ReadLock;
+  typedef boost::unique_lock<ReadWriteMutex> WriteLock;
+  typedef std::deque<TcpClientPtr> TcpClientDeque;
+  typedef boost::unordered_map<int, TcpClientDeque> TcpClientMap;
 
-  protected:
-    void _lock();
-    void _unlock();
+  TcpClientPool(int check_time, boost::asio::io_service &io_service, int times = 1000)
+  :timer_(io_service)
+  {
+    check_time_ = check_time;
+    max_times_ = times;
+    call_later();
+  }
 
-  protected:
-    typedef std::map<uint32_t, std::deque<TcpClientPtr> > ClientMap;
-    ClientMap client_map_;
+  TcpClientPtr get_client(int peer_id);
+
+  int size() const;
+
+  std::string debug_string() const;
+
+  void recollect(TcpClientPtr client);
+
+  void check_clients();
+
+protected:
+  void call_later()
+  {
+    timer_.expires_from_now(boost::posix_time::milliseconds(check_time_ * 1000));
+    timer_.async_wait(boost::bind(&TcpClientPool::check_clients, this));
+  }
+
+protected:
+  int max_times_;
+  int check_time_;
+  ReadWriteMutex mutex_;
+  TcpClientMap free_clients_;
+  boost::asio::deadline_timer timer_;
 };
+
 }
+#endif // __ZERVER_TCP_CLIENT_POOL_H__
 
-
-#endif

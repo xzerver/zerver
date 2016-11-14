@@ -19,26 +19,28 @@
 #ifndef __ZERVER_RESPONSE_MODULE_H__
 #define __ZERVER_RESPONSE_MODULE_H__
 
-#include "../framework/module.h"
+#include "framework/module.h"
 
 namespace zerver {
 class ResponseModule : public Module {
   public:
     class ModuleData : public IModuleData {
       public:
+        ModuleData(FsmContext* context) : timer_(context->io_service()) {
+        }
         boost::asio::deadline_timer timer_;
     };
 
     ResponseModule(const std::string& name) : Module(name) {
     }
-    virtual bool is_async() { return true; }
-    virtual ModState run(FsmContextPtr context);
+    virtual ModState run(FsmContextPtr context, ModState last_mod_state);
 
-    virtual ModuleDataPtr create_data() { 
-      return ModuleDataPtr(new ModuleData); 
+    virtual ModuleDataPtr create_data(FsmContext* context) { 
+      return ModuleDataPtr(new ModuleData(context)); 
     }
   protected:
-    virtual void get_resp(char** resp, uint32_t* resp_len, FsmContextPtr context) = 0;
+    bool cancel_time_out_timer(FsmContextPtr context);
+    virtual shared_string_array get_resp(uint32_t* resp_len, FsmContextPtr context) = 0;
     virtual void on_write_resp_failed(FsmContextPtr context) {}
     virtual void on_write_resp_time_out(FsmContextPtr context) {}
     virtual void on_write_resp_succeed(FsmContextPtr context) {}
@@ -47,7 +49,7 @@ class ResponseModule : public Module {
   private:
     void on_write_resp(FsmContextPtr context, 
         const boost::system::error_code& error);
-    void on_write_time_out(FsmContextPtr context);
+    void on_write_time_out(FsmContextPtr context, const boost::system::error_code & ec);
 };
 
 }

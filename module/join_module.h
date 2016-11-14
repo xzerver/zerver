@@ -20,6 +20,8 @@
 #define __ZERVER_JOIN_MODULE_H__
 
 #include "../framework/module.h"
+#include "boost/atomic.hpp"
+#include "boost/thread/mutex.hpp"
 
 namespace zerver {
 
@@ -27,35 +29,55 @@ class JoinModule : public Module {
   public:
     class ModuleData : public IModuleData {
       public:
+        ModuleData(FsmContext* context) : timer_(context->io_service()) {
+        }
+        void lock() {
+          lock_.lock();
+        }
+        void unlock() {
+          lock_.unlock();
+        }
         void reset() {
           module_joined_num_ = 0;
+          failed_join_ = false;
         }
-        void module_joined() {
-          module_joined_num_ ++;
+        uint16_t module_joined() {
+          return ++module_joined_num_;
         }
-        uint16_t get_module_joined_num() {
-          return module_joined_num_;
+        void failed_join() {
+          failed_join_ = true;
         }
+        bool get_failed_join() {
+          return failed_join_;
+        }
+
+        boost::asio::deadline_timer timer_;
       private:
+        // TODO: this variable should be thread safe
         uint16_t module_joined_num_;
+        bool failed_join_;
+        boost::mutex lock_;
     };
 
-    JoinModule(const std::string& name) : Module(name) {
+    JoinModule(const std::string& name, uint16_t join_num) : Module(name), join_num_(join_num) {
     }
-    bool is_async() { return true; }
 
-    virtual ModuleDataPtr create_data() { 
-      return ModuleDataPtr(new ModuleData); 
+    virtual ModuleDataPtr create_data(FsmContext* context) { 
+      return ModuleDataPtr(new ModuleData(context)); 
     }
-    ModState run(FsmContextPtr context);
-    virtual void on_link_in(ModState state);
+    ModState run(FsmContextPtr context, ModState last_mod_state);
 
     // It's not easy to state the mod_state of a JoinModule, so give it to the application who use this framework
-    virtual ModState get_state(FsmContextPtr context) {
+/*    virtual ModState get_state(FsmContextPtr context) {
       return Mod_Succeed;
     }
+    */
+    virtual uint16_t get_active_join_num(FsmContextPtr context) { return join_num_; }
   protected:
-    uint16_t in_module_num_;
+    void on_joined(FsmContextPtr context, 
+        ModState state, 
+        const boost::system::error_code & ec);
+    uint16_t join_num_;
 };
 
 }

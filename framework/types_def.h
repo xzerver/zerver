@@ -22,13 +22,30 @@
 
 #include <string>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <stdint.h>
+#include <iostream>
+#include <sstream>
+#include <pthread.h>
+#include <sys/time.h>
+#include "utils/util.h"
+#include "boost/shared_ptr.hpp"
+#include "boost/shared_array.hpp"
+#include "thirdparty/perftools/tcmalloc.h"
+#include "p_log.h"
 
-typedef unsigned int  uint32_t;
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
 typedef uint32_t ModState;
+/*
+inline std::string get_cur_time()
+{
+  struct  timeval tv;
+  std::stringstream stream;
+  gettimeofday(&tv, NULL);
+  stream << tv.tv_sec <<"." << tv.tv_usec/1000 << " ";
+  return stream.str();  
+}
 
+#define P_LOG(x) std::cout << "\n" << get_cur_time() << (uint32_t) pthread_self() <<  " " <<__FILE__ << ":" << __LINE__ << ":" << "[" #x "]:"
+*/
 namespace zerver {
 
 class IFsmData;
@@ -45,6 +62,27 @@ typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::map<std::string, Module*> ModuleMap;
 typedef std::map<std::string, std::map<ModState, std::string> > ModuleTransitionMap;
+}
+
+template< typename T >
+struct array_deleter
+{
+  void operator ()(T *p)
+  { 
+    tc_free(p); 
+  }
+};
+
+typedef boost::shared_array<char> shared_string_array;
+
+inline shared_string_array get_shared_string_array(size_t size)
+{
+  return shared_string_array((char*)tc_malloc(size), array_deleter<char>());
+}
+
+inline void reset_shared_string_array(shared_string_array &src, size_t size)
+{
+  src.reset((char*)tc_malloc(size), array_deleter<char>());
 }
 
 #endif
