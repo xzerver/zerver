@@ -7,6 +7,6 @@ CPPS = request_module.cc \
  
 default:$(CPPS)
 	for CPP in $(CPPS) ; do \
-		echo g++ -c $$CPP; \
-		g++ -c $$CPP; \
+		echo g++ -c -Wall -Werror -I../thirdparty/ $$CPP; \
+		g++ -c -Wall -Werror -I../thirdparty/ $$CPP; \
 	done
