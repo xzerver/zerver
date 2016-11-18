@@ -7,8 +7,8 @@
 #include <boost/bind.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
-#include "thirdparty/boost/thread/mutex.hpp"
-#include "thirdparty/boost/thread/shared_mutex.hpp"
+#include "boost/thread/mutex.hpp"
+#include "boost/thread/shared_mutex.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #define RECOVER_TIME 180

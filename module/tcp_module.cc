@@ -18,8 +18,9 @@
 //
 #include "tcp_module.h"
 
-DEFINE_int32(wait_connect_time_out_ms, 50, "wait connect time out ms for feature/predictor server.");
-DEFINE_int32(wait_reply_time_out_ms, 50, "wait reply time out ms for feature/predictor server.");
+int32_t FLAGS_wait_connect_time_out_ms = 50; // wait connect time out ms for feature/predictor server.
+int32_t FLAGS_wait_reply_time_out_ms = 50; //wait reply time out ms for feature/predictor server.
+
 namespace zerver {
 
 ModState TcpModule::run(FsmContextPtr context, ModState last_mod_state) {
@@ -136,7 +137,7 @@ void TcpModule::on_handle_connect_time_out(FsmContextPtr context,
 
 ModState TcpModule::send_request(FsmContextPtr context) {
   uint32_t req_len;
-  shared_string_array req = get_request(&req_len, context);
+  shared_char_array req = get_request(&req_len, context);
   ModuleData* data = dynamic_cast<ModuleData*>(context->get_module_data(name()).get());
   boost::asio::async_write(data->client_->socket(), 
       boost::asio::buffer(req.get(), req_len),
@@ -148,7 +149,7 @@ ModState TcpModule::send_request(FsmContextPtr context) {
 }
 
 void TcpModule::on_write_req(FsmContextPtr context, 
-    shared_string_array req, uint32_t req_len,
+    shared_char_array req, uint32_t req_len,
     const boost::system::error_code& error) {
   ModuleData* data = dynamic_cast<ModuleData*>(context->get_module_data(name()).get());
   ModuleData::Lock lock(data);
@@ -171,7 +172,7 @@ void TcpModule::on_write_req(FsmContextPtr context,
   } else {
 
     uint32_t head_len = get_resp_head_len();
-    shared_string_array shared_head = get_shared_string_array(head_len);
+    shared_char_array shared_head(new char[head_len]);
     char* head = shared_head.get();
     boost::asio::async_read(data->client_->socket(), 
         boost::asio::buffer(head, head_len),
@@ -183,7 +184,7 @@ void TcpModule::on_write_req(FsmContextPtr context,
 }
 
 void TcpModule::on_recv_resp_head(FsmContextPtr context, 
-    shared_string_array head, 
+    shared_char_array head, 
     uint32_t len, 
     const boost::system::error_code& error) {
   ModuleData* data = dynamic_cast<ModuleData*>(context->get_module_data(name()).get());
@@ -208,7 +209,7 @@ void TcpModule::on_recv_resp_head(FsmContextPtr context,
   } else {
     uint32_t body_len = get_resp_body_len(context);
 
-    shared_string_array shared_body = get_shared_string_array(body_len);
+    shared_char_array shared_body(new char[body_len]);
     char* body = shared_body.get();
     boost::asio::async_read(data->client_->socket(),
         boost::asio::buffer(body, body_len),
@@ -220,7 +221,7 @@ void TcpModule::on_recv_resp_head(FsmContextPtr context,
 }
 
 void TcpModule::on_recv_resp_body(FsmContextPtr context, 
-    shared_string_array body, 
+    shared_char_array body, 
     uint32_t len, 
     const boost::system::error_code& error) {
   ModuleData* data = dynamic_cast<ModuleData*>(context->get_module_data(name()).get());

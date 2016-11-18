@@ -26,7 +26,7 @@ ModState ResponseModule::run(FsmContextPtr context, ModState last_mod_state) {
   tcp::socket& socket = context->conn()->socket();
 
   uint32_t resp_len;
-  shared_string_array resp = get_resp(&resp_len, context);
+  shared_char_array resp = get_resp(&resp_len, context);
   if (!resp.get()) {
     return Mod_Failed;
   }

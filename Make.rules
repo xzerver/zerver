@@ -1,0 +1,7 @@
+OO=$(CPPS:.cc=.o)
+
+%.o:%.cc
+	g++ $(INC_PATH) $(CXXFLAGS) -c $^ -o $@
+
+lib:$(OO)
+	ar rcs $(LIB) $(OO)

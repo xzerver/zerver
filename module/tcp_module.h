@@ -92,16 +92,16 @@ class TcpModule : public Module {
     ModState send_request(FsmContextPtr context);
 
     void on_write_req(FsmContextPtr context, 
-        shared_string_array req, uint32_t req_len,
+        shared_char_array req, uint32_t req_len,
         const boost::system::error_code& error);
 
     void on_recv_resp_head(FsmContextPtr context,
-        shared_string_array head, 
+        shared_char_array head, 
         uint32_t len, 
         const boost::system::error_code& error);
 
     void on_recv_resp_body(FsmContextPtr context,
-        shared_string_array body, 
+        shared_char_array body, 
         uint32_t len, 
         const boost::system::error_code& error);
 
@@ -121,10 +121,10 @@ class TcpModule : public Module {
     virtual void on_read_head_failed(FsmContextPtr context) {}
     virtual void on_read_body_failed(FsmContextPtr context) {}
     virtual void on_connect_failed(FsmContextPtr context, std::string ip, uint16_t port) {}
-    virtual bool on_read_head_impl(shared_string_array head, 
+    virtual bool on_read_head_impl(shared_char_array head, 
         uint32_t len, 
         FsmContextPtr context) = 0;
-    virtual bool on_read_body_impl(shared_string_array body, 
+    virtual bool on_read_body_impl(shared_char_array body, 
         uint32_t len, 
         FsmContextPtr context) = 0;
     virtual void on_handle_time_out_impl(FsmContextPtr context) {}
@@ -132,7 +132,7 @@ class TcpModule : public Module {
     virtual bool get_server_ip_port(std::string& ip, unsigned short& port, 
         FsmContextPtr context) = 0;
 
-    virtual shared_string_array get_request(uint32_t* len, FsmContextPtr context) = 0;
+    virtual shared_char_array get_request(uint32_t* len, FsmContextPtr context) = 0;
     virtual uint32_t get_resp_body_len(FsmContextPtr context) = 0;
     
     TcpClientPool& client_pool_;

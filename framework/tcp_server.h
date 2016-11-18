@@ -20,7 +20,8 @@
 #define __ZERVER_TCP_SERVER_H__
 
 #include "fsm.h"
-#include "thirdparty/boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+
 namespace zerver {
 enum run_mode
 {

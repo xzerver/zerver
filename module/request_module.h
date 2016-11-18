@@ -55,13 +55,13 @@ class RequestModule : public Module {
     virtual void on_read_version_time_out(FsmContextPtr context) {}
     virtual void on_read_head_and_body_time_out(FsmContextPtr context) {}
 
-    virtual bool on_read_version_impl(shared_string_array version, 
+    virtual bool on_read_version_impl(shared_char_array version, 
         uint32_t len, FsmContextPtr context) = 0;
     
-    virtual bool on_read_head_impl(shared_string_array head, 
+    virtual bool on_read_head_impl(shared_char_array head, 
         uint32_t len, FsmContextPtr context) = 0;
 
-    virtual bool on_read_body_impl(shared_string_array body, 
+    virtual bool on_read_body_impl(shared_char_array body, 
         uint32_t len, FsmContextPtr context) = 0;
   
     virtual ModState get_succeed_state(FsmContextPtr context) {
@@ -70,17 +70,17 @@ class RequestModule : public Module {
     bool cancel_time_out_timer(FsmContextPtr context);
   private:
     void on_read_version(FsmContextPtr context,
-        shared_string_array head, 
+        shared_char_array head, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
     void on_read_head(FsmContextPtr context,
-        shared_string_array head, 
+        shared_char_array head, 
         uint32_t len, 
         const boost::system::error_code& ec);
 
     void on_read_body(FsmContextPtr context,
-        shared_string_array body, 
+        shared_char_array body, 
         uint32_t len, 
         const boost::system::error_code& ec);
 

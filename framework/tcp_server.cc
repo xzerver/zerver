@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "p_log.h"
-#include "thirdparty/boost/unordered_set.hpp"
+#include <boost/unordered_set.hpp>
 
 namespace zerver {
 

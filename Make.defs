@@ -1,0 +1,5 @@
+CXXFLAGS = -g
+
+ROOT=/home/fxzeng/code/zerver/
+
+INC_PATH = -I$(ROOT)

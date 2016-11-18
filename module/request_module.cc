@@ -20,8 +20,8 @@
 #include "framework/fsm.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-DEFINE_int32(wait_ads_request_time_out, 600, "wait read request time from ads server.");
-DEFINE_int32(read_ads_body_time_out_ms, 10, "wait read body time from ads server.");
+int32_t FLAGS_wait_ads_request_time_out = 600; // wait read request time from ads server.
+int32_t FLAGS_read_ads_body_time_out_ms = 10; // wait read body time from ads server.
 
 using boost::asio::ip::tcp;
 
@@ -31,7 +31,7 @@ ModState RequestModule::run(FsmContextPtr context, ModState last_mod_state) {
   tcp::socket& socket = context->conn()->socket();
 
   uint32_t version_len = get_version_len(context);
-  shared_string_array shared_ver = get_shared_string_array(version_len);
+  shared_char_array shared_ver(new char[version_len]);
   char* version = shared_ver.get(); 
   boost::asio::deadline_timer& timer = dynamic_cast<ModuleData*>(context->get_module_data(name()).get())->timer_;
   uint32_t ms = get_read_version_time_out_ms();
@@ -60,7 +60,7 @@ bool RequestModule::cancel_time_out_timer(FsmContextPtr context) {
 
 void RequestModule::on_read_version(
     FsmContextPtr context,
-    shared_string_array version, 
+    shared_char_array version, 
     uint32_t len, 
     const boost::system::error_code& ec) {
   if (ec || !on_read_version_impl(version, len, context)) {
@@ -82,7 +82,7 @@ void RequestModule::on_read_version(
     }
     uint32_t head_len = get_head_len(context);
     tcp::socket& socket = context->conn()->socket();
-    shared_string_array shared_head = get_shared_string_array(head_len);
+    shared_char_array shared_head(new char[head_len]);
     char* head = shared_head.get();
     uint32_t ms = get_read_head_and_body_time_out_ms();
     boost::asio::deadline_timer& timer = dynamic_cast<ModuleData*>(context->get_module_data(name()).get())->timer_;
@@ -98,7 +98,7 @@ void RequestModule::on_read_version(
 }
 
 void RequestModule::on_read_head(FsmContextPtr context,
-    shared_string_array head, 
+    shared_char_array head, 
     uint32_t len, 
     const boost::system::error_code& ec) {
   if (ec || !on_read_head_impl(head, len, context)) {
@@ -119,7 +119,7 @@ void RequestModule::on_read_head(FsmContextPtr context,
     uint32_t body_len = get_body_len(context);
 
     tcp::socket& socket = context->conn()->socket();
-    shared_string_array shared_body =get_shared_string_array(body_len);
+    shared_char_array shared_body(new char[body_len]);
     char* body = shared_body.get(); 
     boost::asio::async_read(socket, 
         boost::asio::buffer(body, body_len),
@@ -131,7 +131,7 @@ void RequestModule::on_read_head(FsmContextPtr context,
 
 
 void RequestModule::on_read_body(FsmContextPtr context,
-    shared_string_array body, 
+    shared_char_array body, 
     uint32_t len, 
     const boost::system::error_code& ec) {
   if (ec || !on_read_body_impl(body, len, context)) {

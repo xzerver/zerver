@@ -40,7 +40,7 @@ class ResponseModule : public Module {
     }
   protected:
     bool cancel_time_out_timer(FsmContextPtr context);
-    virtual shared_string_array get_resp(uint32_t* resp_len, FsmContextPtr context) = 0;
+    virtual shared_char_array get_resp(uint32_t* resp_len, FsmContextPtr context) = 0;
     virtual void on_write_resp_failed(FsmContextPtr context) {}
     virtual void on_write_resp_time_out(FsmContextPtr context) {}
     virtual void on_write_resp_succeed(FsmContextPtr context) {}
