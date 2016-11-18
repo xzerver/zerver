@@ -21,37 +21,90 @@
 
 
 #include "../framework/data.h"
-#include "KaraModuleData.h"
-#include "GuruModuleData.h"
-
+#include "ReqModuleData.h"
+#include "GenFsReqModuleData.h"
+#include "FsForkModuleData.h"
+#include "FsModuleData.h"
+#include "PsForkModule2Data.h"
+#include "PsBackfillModule2Data.h"
+#include "PsModule2Data.h"
+#include "PsJoinModule2Data.h"
+#include "FsJoinModuleData.h"
+#include "GenPsReqModuleData.h"
+#include "PsForkModuleData.h"
+#include "PsModuleData.h"
+#include "PsBackfillModuleData.h"
+#include "PsJoinModuleData.h"
+#include "RespModuleData.h"
+#include "IfRandModuleData.h"
+#include "RandRespModuleData.h"
+#include "EmptyRespModuleData.h"
+#include "EndModuleData.h"
 
 #define DEFINE_MODULE_DATA(NNNNModuleData, nnnn_mod_data) \
 public: \
   NNNNModuleData* get##NNNNModuleData() { \
-    if (nnnn_mod_data##_.get() == NULL) { \
-      nnnn_mod_data##_.reset(new NNNNModuleData(data_)); \
-    } \
     return nnnn_mod_data##_.get(); \
   } \
 private: \
   boost::shared_ptr<NNNNModuleData> nnnn_mod_data##_;
 
+#define NEW_MODULE_DATA(NNNNModuleData, nnnn_mod_data) nnnn_mod_data##_.reset(new NNNNModuleData(data_))
 
 using namespace zerver;
 
-class FsmData : public IFsmData{
+class FsmData : public IFsmData {
   public:
     FsmData() : IFsmData() {
       data_ = new Data();
+      NEW_MODULE_DATA(ReqModuleData, req_mod_data);
+      NEW_MODULE_DATA(GenFsReqModuleData, gen_fs_req_mod_data);
+      NEW_MODULE_DATA(FsForkModuleData, fs_fork_mod_data);
+      NEW_MODULE_DATA(FsModuleData, fs_mod_data);
+      NEW_MODULE_DATA(PsForkModule2Data, ps_fork_mod2_data);
+      NEW_MODULE_DATA(PsModule2Data, ps_mod2_data);
+      NEW_MODULE_DATA(PsBackfillModule2Data, ps_backfill_mod2_data);
+      NEW_MODULE_DATA(PsJoinModule2Data, ps_join_mod2_data);
+      NEW_MODULE_DATA(FsJoinModuleData, fs_join_mod_data);
+      NEW_MODULE_DATA(GenPsReqModuleData, gen_ps_req_mod_data);
+      NEW_MODULE_DATA(PsForkModuleData, ps_fork_mod_data);
+      NEW_MODULE_DATA(PsModuleData, ps_mod_data);
+      NEW_MODULE_DATA(PsBackfillModuleData, ps_backfill_mod_data);
+      NEW_MODULE_DATA(PsJoinModuleData, ps_join_mod_data);
+      NEW_MODULE_DATA(RespModuleData, resp_mod_data);
+      NEW_MODULE_DATA(RandRespModuleData, rand_resp_mod_data);
+      NEW_MODULE_DATA(IfRandModuleData, if_rand_mod_data);
+      NEW_MODULE_DATA(EmptyRespModuleData, empty_resp_mod_data);
+      NEW_MODULE_DATA(EndModuleData, end_mod_data);
     }
 
     virtual ~FsmData() {
       delete data_;
     }
 
-    DEFINE_MODULE_DATA(KaraModuleData, kara_mod_data)
-    DEFINE_MODULE_DATA(GuruModuleData, guru_mod_data)
+    virtual void reset() {
+      data_->reset();
+    }
 
+    DEFINE_MODULE_DATA(ReqModuleData, req_mod_data)
+    DEFINE_MODULE_DATA(GenFsReqModuleData, gen_fs_req_mod_data)
+    DEFINE_MODULE_DATA(FsForkModuleData, fs_fork_mod_data)
+    DEFINE_MODULE_DATA(FsModuleData, fs_mod_data)
+    DEFINE_MODULE_DATA(PsForkModule2Data, ps_fork_mod2_data)
+    DEFINE_MODULE_DATA(PsModule2Data, ps_mod2_data)
+    DEFINE_MODULE_DATA(PsBackfillModule2Data, ps_backfill_mod2_data)
+    DEFINE_MODULE_DATA(PsJoinModule2Data, ps_join_mod2_data)
+    DEFINE_MODULE_DATA(FsJoinModuleData, fs_join_mod_data)
+    DEFINE_MODULE_DATA(GenPsReqModuleData, gen_ps_req_mod_data)
+    DEFINE_MODULE_DATA(PsForkModuleData, ps_fork_mod_data)
+    DEFINE_MODULE_DATA(PsModuleData, ps_mod_data)
+    DEFINE_MODULE_DATA(PsBackfillModuleData, ps_backfill_mod_data)
+    DEFINE_MODULE_DATA(PsJoinModuleData, ps_join_mod_data)
+    DEFINE_MODULE_DATA(RespModuleData, resp_mod_data)
+    DEFINE_MODULE_DATA(RandRespModuleData, rand_resp_mod_data)
+    DEFINE_MODULE_DATA(IfRandModuleData, if_rand_mod_data)
+    DEFINE_MODULE_DATA(EmptyRespModuleData, empty_resp_mod_data)
+    DEFINE_MODULE_DATA(EndModuleData, end_mod_data)
   private:
     Data* data_;
 };
